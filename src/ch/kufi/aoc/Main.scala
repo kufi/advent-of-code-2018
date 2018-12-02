@@ -4,13 +4,14 @@ import java.time.LocalDate
 
 object Main {
   val challenges: Map[Int, Challenge] = Map(
-    1 -> new Day1()
+    1 -> new Day1(),
+    2 -> new Day2()
   )
 
   def main(args: Array[String]): Unit = {
     val challenge = getChallenge(args)
-    println(challenge.map(_.part1()))
-    println(challenge.map(_.part2()))
+    println(challenge.map(_.part1()).toString)
+    println(challenge.map(_.part2()).toString)
   }
 
   private def getChallenge(args: Array[String]) = {
