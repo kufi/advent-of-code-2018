@@ -1,7 +1,7 @@
 package ch.kufi.aoc
 
-class Day2 extends Challenge {
-  override def part1(): Any = {
+class Day2 extends Challenge[Int, String] {
+  override def part1(): Int = {
     val charCounts = readLines("day2.txt")
       .map(_
         .groupBy(identity)
@@ -17,13 +17,14 @@ class Day2 extends Challenge {
     charCounts._1 * charCounts._2
   }
 
-  override def part2(): Any = {
+  override def part2(): String = {
     readLines("day2.txt")
       .toList
       .combinations(2)
       .map(tuple => (tuple.head.length - 1, createDiffString(tuple.head, tuple.last)))
       .find(t => t._1 == t._2.length)
       .map(_._2)
+      .get
   }
 
   private def createDiffString(first: String, second: String) = {

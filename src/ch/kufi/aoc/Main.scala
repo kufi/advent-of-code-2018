@@ -3,7 +3,7 @@ package ch.kufi.aoc
 import java.time.LocalDate
 
 object Main {
-  val challenges: Map[Int, Challenge] = Map(
+  val challenges: Map[Int, Challenge[_, _]] = Map(
     1 -> new Day1(),
     2 -> new Day2()
   )
