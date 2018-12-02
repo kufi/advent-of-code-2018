@@ -3,11 +3,11 @@ package ch.kufi.aoc
 import scala.io.Source
 
 class Day1 extends Challenge {
-  override def part1(): String = {
+  override def part1(): Any = {
     frequencies.sum.toString
   }
 
-  override def part2(): String = {
+  override def part2(): Any = {
     Stream
       .continually(frequencies.toStream)
       .flatten
@@ -15,10 +15,9 @@ class Day1 extends Challenge {
         case ((existingFrequencies, lastFrequency), newFrequency) =>
           (existingFrequencies + lastFrequency) -> (lastFrequency + newFrequency)
       }
-      .dropWhile(frequencies => !frequencies._1.contains(frequencies._2))
-      .head
-      ._2
-      .toString
+      .find(frequencies => frequencies._1.contains(frequencies._2))
+      .map(_._2.toString)
+      .getOrElse("")
   }
 
   private val frequencies = {
