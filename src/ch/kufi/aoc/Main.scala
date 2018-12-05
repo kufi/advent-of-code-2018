@@ -6,7 +6,8 @@ object Main {
   val challenges: Map[Int, Challenge[_, _]] = Map(
     1 -> new Day1(),
     2 -> new Day2(),
-    3 -> new Day3()
+    3 -> new Day3(),
+    4 -> new Day4()
   )
 
   def main(args: Array[String]): Unit = {
