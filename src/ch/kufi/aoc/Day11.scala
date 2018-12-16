@@ -4,7 +4,7 @@ class Day11 extends Challenge[(Int, Int), ((Int, Int), Int)] {
   val serialNumber = 3628
 
   override def part1(): (Int, Int) = {
-    val grid = createGrid()
+    val grid = createGrid(300)
     val powerLevels = createPowerLevels(serialNumber, grid)
 
     val levels = calculatePowerLevelsUpToSize(3, powerLevels)
@@ -12,7 +12,7 @@ class Day11 extends Challenge[(Int, Int), ((Int, Int), Int)] {
   }
 
   override def part2(): ((Int, Int), Int) = {
-    val grid = createGrid()
+    val grid = createGrid(300)
     val powerLevels = createPowerLevels(serialNumber, grid)
 
     val levels = calculatePowerLevelsUpToSize(300, powerLevels)
@@ -31,24 +31,49 @@ class Day11 extends Challenge[(Int, Int), ((Int, Int), Int)] {
   }
 
   private def calculatePowerLevelsUpToSize(size: Int, powerLevels: Map[(Int, Int), Int]): Map[Int, Map[(Int, Int), Int]] = {
+    def calculateEven(previousSizes: Map[Int, Map[(Int, Int), Int]]) = {
+      val expandGrid = List((0, 0), (size / 2, 0), (0, size / 2), (size / 2, size / 2))
+      val lowerGrid = previousSizes(size / 2)
+
+      createGrid(300 - (size - 1))
+        .map {
+          case (x, y) =>
+            (x, y) -> expandGrid.map(pos => lowerGrid((x + pos._1, y + pos._2))).sum
+        }
+        .toMap
+    }
+
+    def calculateOdd(previousSizes: Map[Int, Map[(Int, Int), Int]]) = {
+      val half = size / 2
+      val expandGridSmall = List((0, 0), (size - half, 0), (0, size - half), (size - half, size - half))
+      val smallGrid = previousSizes(half)
+      val expandGridBig = List((0, 0), (half, half))
+      val bigGrid = previousSizes(size - half)
+      val minusBig = List((0, 0), (size - half, size - half))
+
+      createGrid(300 - (size - 1))
+        .map {
+          case (x, y) =>
+            val smallSum = expandGridSmall.map(pos => smallGrid((x + pos._1, y + pos._2))).sum
+            val bigSum = expandGridBig.map(pos => bigGrid((x + pos._1, y + pos._2))).sum
+            val bigMinus = minusBig.map(pos => smallGrid((x + pos._1, y + pos._2))).sum
+            val center = powerLevels((x + half, y + half))
+            val cross = bigSum - bigMinus - center
+
+            (x, y) -> (smallSum + cross)
+        }
+        .toMap
+    }
+
     if (size == 1) {
       Map(size -> powerLevels)
     } else {
       val previousSizes = calculatePowerLevelsUpToSize(size - 1, powerLevels)
-      val removeFrom = 300 - size - 1
-      val expandX = (0 until size - 1).map((_, size - 1))
-      val expandY = (0 until size - 1).map((size - 1, _))
-      val expandGrid = Set(expandX, expandY, Set((size - 1, size - 1))).flatten
-
-      val gridForSize = previousSizes(size - 1)
-        .filterKeys(position => position._1 < removeFrom && position._2 < removeFrom)
-        .map {
-          case (position, powerLevel) =>
-            position -> expandGrid.foldLeft(powerLevel) {
-              case (sum, pos) =>
-                sum + powerLevels((position._1 + pos._1, position._2 + pos._2))
-            }
-        }
+      val gridForSize = if (size % 2 == 0) {
+        calculateEven(previousSizes)
+      } else {
+        calculateOdd(previousSizes)
+      }
 
       previousSizes + (size -> gridForSize)
     }
@@ -84,10 +109,10 @@ class Day11 extends Challenge[(Int, Int), ((Int, Int), Int)] {
     finalLevel
   }
 
-  private def createGrid(): Set[(Int, Int)] = {
+  private def createGrid(size: Int): Set[(Int, Int)] = {
     (for {
-      y <- 1 to 300
-      x <- 1 to 300
+      y <- 1 to size
+      x <- 1 to size
     } yield (x, y)).toSet
   }
 
