@@ -2,6 +2,7 @@ package ch.kufi.aoc
 
 import java.time.LocalDate
 
+
 object Main {
   val challenges: Map[Int, () => Challenge[_, _]] = Map(
     1 -> (() => new Day1()),
@@ -16,7 +17,8 @@ object Main {
     10 -> (() => new Day10()),
     11 -> (() => new Day11()),
     12 -> (() => new Day12()),
-    13 -> (() => new Day13())
+    13 -> (() => new Day13()),
+    14 -> (() => new Day14())
   )
 
   def main(args: Array[String]): Unit = {
