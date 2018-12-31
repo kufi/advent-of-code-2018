@@ -9,7 +9,29 @@ class Day17 extends Challenge[Int, Int] {
   override def part1(): Int = {
     val well = Square(500, 0)
 
-    val clay = readLines("day17-test.txt")
+    val clay = readClay()
+    val allWatered = waterCave(well, clay)
+
+    printCave(clay, allWatered)
+    println("***************************************************")
+
+    val minY = clay.minBy(_.y).y
+    allWatered.count(_.y >= minY)
+  }
+
+
+  override def part2(): Int = {
+    val well = Square(500, 0)
+
+    val clay = readClay()
+    val allWatered = waterCave(well, clay)
+
+    val minY = clay.minBy(_.y).y
+    allWatered.count(enclosedInClay(_, clay, allWatered))
+  }
+
+  private def readClay() = {
+    readLines("day17.txt")
       .flatMap {
         case xRegex(x, fromY, toY) =>
           (fromY.toInt to toY.toInt).map(y => Square(x.toInt, y))
@@ -17,51 +39,68 @@ class Day17 extends Challenge[Int, Int] {
           (fromX.toInt to toX.toInt).map(x => Square(x, y.toInt))
       }
       .toSet
+  }
 
+  private def waterCave(well: Square, clay: Set[Square]) = {
     val maxY = clay.maxBy(_.y).y
 
-    val (_, allWatered) = Iterator
+    Iterator
       .iterate((List(Down(well.below), Left(well.left), Right(well.right)), Set.empty[Square])) {
         case (Down(square) :: rest, watered) if square.y > maxY =>
           (rest, watered)
-        case (Down(square) :: rest, watered) if !clay.contains(square) && !watered.contains(square) =>
+        case (Down(square) :: rest, watered) if isFree(square, clay, watered) =>
           (Down(square.below) +: Left(square.left) +: Right(square.right) +: rest, watered + square)
-        case (Down(square) :: rest, watered) =>
-          (rest, watered)
-        case (Left(square) :: rest, watered) if !clay.contains(square) && !watered.contains(square) && enclosedInClay(square.below, clay, watered) =>
-          if (watered.contains(square.below) || clay.contains(square.below)) {
-            (Left(square.left) +: rest, watered + square)
-          } else if (clay.contains(square.right.below)) {
-            (Down(square.below) +: rest, watered + square)
-          } else {
-            (rest, watered)
-          }
-        case (Left(_) :: rest, watered) =>
-          (rest, watered)
-        case (Right(square) :: rest, watered) if !clay.contains(square) && !watered.contains(square) && enclosedInClay(square.below, clay, watered) =>
-          if (watered.contains(square.below) || clay.contains(square.below)) {
-            (Right(square.right) +: rest, watered + square)
-          } else if (clay.contains(square.left.below)) {
-            (Down(square.below) +: rest, watered + square)
-          } else {
-            (rest, watered)
-          }
-        case (Right(_) :: rest, watered) =>
+        case (Left(square) :: rest, watered) if isFree(square, clay, watered) && shouldExpand(square, clay, watered, square.below.right) =>
+          (Down(square.below) +: Left(square.left) +: rest, watered + square)
+        case (Right(square) :: rest, watered) if isFree(square, clay, watered) && shouldExpand(square, clay, watered, square.below.left) =>
+          (Down(square.below) +: Right(square.right) +: rest, watered + square)
+        case (_ :: rest, watered) =>
           (rest, watered)
       }
-      .map(a => {
-        printCave(clay, a._2)
-        println(a._1.take(5) + " - " + a._1.size)
-        println("*******************")
-        a
-      })
-      .find(_._2.count(_.y == maxY) == 2)
+      .find(_._1.isEmpty)
       .get
+      ._2
+  }
 
-    printCave(clay, allWatered)
-    println("***************************************************")
+  /**
+    * enclosedInClay(diagonal, clay, watered) checks the following case to pass and generates a Left|Right check (x is the tile being checked, diagonal is y):
+    * ..x|||#
+    * ..#y||#
+    * ..#####
+    *
+    * isFree && clay.contains checks that the following case passes and generates a Down(..) check (Diagonal is the y, which has to be a clay tile):
+    * .x||||#
+    * ..y|||#
+    * ..#####
+    *
+    * but fails the following case (y is a watered tile):
+    * x|||||#
+    * .y#|||#
+    * .|#####
+    *
+    * the clay.contains(square.below) && clay.contains(diagonal) checks that the following case passes (y is a clay tile):
+    *
+    * ...x|||#
+    * #.##y#|#
+    * #.#..#|#
+    * #.####|#
+    * #||||||#
+    * ########
+    *
+    * but the following case fails (y is a watered tile): downstream passes by a clay-wall (without the clay.contains(diagonal) it "spills" onto the clay wall:
+    *
+    * x|.
+    * #y.
+    * #|.
+    */
+  def shouldExpand(square: Square, clay: Set[Square], watered: Set[Square], diagonal: Square): Boolean = {
+    enclosedInClay(diagonal, clay, watered) ||
+      (isFree(square.below, clay, watered) && clay.contains(diagonal)) ||
+      (clay.contains(square.below) && clay.contains(diagonal))
+  }
 
-    allWatered.size
+  def isFree(square: Square, clay: Set[Square], watered: Set[Square]): Boolean = {
+    !clay.contains(square) && !watered.contains(square)
   }
 
   def enclosedInClay(square: Square, clay: Set[Square], watered: Set[Square]): Boolean = {
@@ -118,7 +157,4 @@ class Day17 extends Challenge[Int, Int] {
     def below: Square = Square(x, y + 1)
   }
 
-  override def part2(): Int = {
-    0
-  }
 }
