@@ -6,22 +6,22 @@ class Day16 extends Challenge[Int, Int] {
   private val opCodeRegex = """([0-9]*) ([0-9]*) ([0-9]*) ([0-9]*)""".r
 
   private val opcodeInitializers = List[(Int, Int, Int) => Opcode](
-    Addr.fromInts _,
-    Addi.fromInts _,
-    Mulr.fromInts _,
-    Muli.fromInts _,
-    Banr.fromInts _,
-    Bani.fromInts _,
-    Borr.fromInts _,
-    Bori.fromInts _,
-    Setr.fromInts _,
-    Seti.fromInts _,
-    Gtir.fromInts _,
-    Gtri.fromInts _,
-    Gtrr.fromInts _,
-    Eqir.fromInts _,
-    Eqri.fromInts _,
-    Eqrr.fromInts _
+    Addr.fromInts,
+    Addi.fromInts,
+    Mulr.fromInts,
+    Muli.fromInts,
+    Banr.fromInts,
+    Bani.fromInts,
+    Borr.fromInts,
+    Bori.fromInts,
+    Setr.fromInts,
+    Seti.fromInts,
+    Gtir.fromInts,
+    Gtri.fromInts,
+    Gtrr.fromInts,
+    Eqir.fromInts,
+    Eqri.fromInts,
+    Eqrr.fromInts
   )
 
   override def part1(): Int = {
@@ -76,194 +76,193 @@ class Day16 extends Challenge[Int, Int] {
       .get
       .mapValues(_.head)
   }
+}
 
-  case class DeviceState(registers: Vector[Int]) {
-    def read(register: Register): Value = Value(registers(register.number))
+case class DeviceState(registers: Vector[Int]) {
+  def read(register: Register): Value = Value(registers(register.number))
 
-    def write(register: Register, value: Value): DeviceState = DeviceState(registers.updated(register.number, value.value))
-  }
+  def write(register: Register, value: Value): DeviceState = DeviceState(registers.updated(register.number, value.value))
+}
 
-  case class Register(number: Int)
+case class Register(number: Int)
 
-  case class Value(value: Int) extends Ordered[Value] {
+case class Value(value: Int) extends Ordered[Value] {
 
-    def +(other: Value) = Value(value + other.value)
+  def +(other: Value) = Value(value + other.value)
 
-    def *(other: Value) = Value(value * other.value)
+  def *(other: Value) = Value(value * other.value)
 
-    def &(other: Value) = Value(value & other.value)
+  def &(other: Value) = Value(value & other.value)
 
-    def |(other: Value) = Value(value | other.value)
+  def |(other: Value) = Value(value | other.value)
 
-    override def compare(that: Value): Int = value - that.value
-  }
+  override def compare(that: Value): Int = value - that.value
+}
 
-  sealed trait Opcode {
-    def run(state: DeviceState): DeviceState
-  }
+sealed trait Opcode {
+  def run(state: DeviceState): DeviceState
+}
 
-  case class Addr(a: Register, b: Register, c: Register) extends Opcode {
-    override def run(state: DeviceState): DeviceState = state.write(c, state.read(a) + state.read(b))
-  }
+case class Addr(a: Register, b: Register, c: Register) extends Opcode {
+  override def run(state: DeviceState): DeviceState = state.write(c, state.read(a) + state.read(b))
+}
 
-  case object Addr {
-    def fromInts(a: Int, b: Int, c: Int) = Addr(Register(a), Register(b), Register(c))
-  }
+case object Addr {
+  def fromInts(a: Int, b: Int, c: Int) = Addr(Register(a), Register(b), Register(c))
+}
 
-  case class Addi(a: Register, b: Value, c: Register) extends Opcode {
-    override def run(state: DeviceState): DeviceState = state.write(c, state.read(a) + b)
-  }
+case class Addi(a: Register, b: Value, c: Register) extends Opcode {
+  override def run(state: DeviceState): DeviceState = state.write(c, state.read(a) + b)
+}
 
-  case object Addi {
-    def fromInts(a: Int, b: Int, c: Int) = Addi(Register(a), Value(b), Register(c))
-  }
+case object Addi {
+  def fromInts(a: Int, b: Int, c: Int) = Addi(Register(a), Value(b), Register(c))
+}
 
-  case class Mulr(a: Register, b: Register, c: Register) extends Opcode {
-    override def run(state: DeviceState): DeviceState = state.write(c, state.read(a) * state.read(b))
-  }
+case class Mulr(a: Register, b: Register, c: Register) extends Opcode {
+  override def run(state: DeviceState): DeviceState = state.write(c, state.read(a) * state.read(b))
+}
 
-  case object Mulr {
-    def fromInts(a: Int, b: Int, c: Int) = Mulr(Register(a), Register(b), Register(c))
-  }
+case object Mulr {
+  def fromInts(a: Int, b: Int, c: Int) = Mulr(Register(a), Register(b), Register(c))
+}
 
-  case class Muli(a: Register, b: Value, c: Register) extends Opcode {
-    override def run(state: DeviceState): DeviceState = state.write(c, state.read(a) * b)
-  }
+case class Muli(a: Register, b: Value, c: Register) extends Opcode {
+  override def run(state: DeviceState): DeviceState = state.write(c, state.read(a) * b)
+}
 
-  case object Muli {
-    def fromInts(a: Int, b: Int, c: Int) = Muli(Register(a), Value(b), Register(c))
-  }
+case object Muli {
+  def fromInts(a: Int, b: Int, c: Int) = Muli(Register(a), Value(b), Register(c))
+}
 
-  case class Banr(a: Register, b: Register, c: Register) extends Opcode {
-    override def run(state: DeviceState): DeviceState = state.write(c, state.read(a) & state.read(b))
-  }
+case class Banr(a: Register, b: Register, c: Register) extends Opcode {
+  override def run(state: DeviceState): DeviceState = state.write(c, state.read(a) & state.read(b))
+}
 
-  case object Banr {
-    def fromInts(a: Int, b: Int, c: Int) = Banr(Register(a), Register(b), Register(c))
-  }
+case object Banr {
+  def fromInts(a: Int, b: Int, c: Int) = Banr(Register(a), Register(b), Register(c))
+}
 
-  case class Bani(a: Register, b: Value, c: Register) extends Opcode {
-    override def run(state: DeviceState): DeviceState = state.write(c, state.read(a) & b)
-  }
+case class Bani(a: Register, b: Value, c: Register) extends Opcode {
+  override def run(state: DeviceState): DeviceState = state.write(c, state.read(a) & b)
+}
 
-  case object Bani {
-    def fromInts(a: Int, b: Int, c: Int) = Bani(Register(a), Value(b), Register(c))
-  }
+case object Bani {
+  def fromInts(a: Int, b: Int, c: Int) = Bani(Register(a), Value(b), Register(c))
+}
 
-  case class Borr(a: Register, b: Register, c: Register) extends Opcode {
-    override def run(state: DeviceState): DeviceState = state.write(c, state.read(a) | state.read(b))
-  }
+case class Borr(a: Register, b: Register, c: Register) extends Opcode {
+  override def run(state: DeviceState): DeviceState = state.write(c, state.read(a) | state.read(b))
+}
 
-  case object Borr {
-    def fromInts(a: Int, b: Int, c: Int) = Borr(Register(a), Register(b), Register(c))
-  }
+case object Borr {
+  def fromInts(a: Int, b: Int, c: Int) = Borr(Register(a), Register(b), Register(c))
+}
 
-  case class Bori(a: Register, b: Value, c: Register) extends Opcode {
-    override def run(state: DeviceState): DeviceState = state.write(c, state.read(a) | b)
-  }
+case class Bori(a: Register, b: Value, c: Register) extends Opcode {
+  override def run(state: DeviceState): DeviceState = state.write(c, state.read(a) | b)
+}
 
-  case object Bori {
-    def fromInts(a: Int, b: Int, c: Int) = Bori(Register(a), Value(b), Register(c))
-  }
+case object Bori {
+  def fromInts(a: Int, b: Int, c: Int) = Bori(Register(a), Value(b), Register(c))
+}
 
-  case class Setr(a: Register, b: Register, c: Register) extends Opcode {
-    override def run(state: DeviceState): DeviceState = state.write(c, state.read(a))
-  }
+case class Setr(a: Register, b: Register, c: Register) extends Opcode {
+  override def run(state: DeviceState): DeviceState = state.write(c, state.read(a))
+}
 
-  case object Setr {
-    def fromInts(a: Int, b: Int, c: Int) = Setr(Register(a), Register(b), Register(c))
-  }
+case object Setr {
+  def fromInts(a: Int, b: Int, c: Int) = Setr(Register(a), Register(b), Register(c))
+}
 
-  case class Seti(a: Value, b: Register, c: Register) extends Opcode {
-    override def run(state: DeviceState): DeviceState = state.write(c, a)
-  }
+case class Seti(a: Value, b: Register, c: Register) extends Opcode {
+  override def run(state: DeviceState): DeviceState = state.write(c, a)
+}
 
-  case object Seti {
-    def fromInts(a: Int, b: Int, c: Int) = Seti(Value(a), Register(b), Register(c))
-  }
+case object Seti {
+  def fromInts(a: Int, b: Int, c: Int) = Seti(Value(a), Register(b), Register(c))
+}
 
-  case class Gtir(a: Value, b: Register, c: Register) extends Opcode {
-    override def run(state: DeviceState): DeviceState = {
-      if (a > state.read(b)) {
-        state.write(c, Value(1))
-      } else {
-        state.write(c, Value(0))
-      }
+case class Gtir(a: Value, b: Register, c: Register) extends Opcode {
+  override def run(state: DeviceState): DeviceState = {
+    if (a > state.read(b)) {
+      state.write(c, Value(1))
+    } else {
+      state.write(c, Value(0))
     }
   }
+}
 
-  case object Gtir {
-    def fromInts(a: Int, b: Int, c: Int) = Gtir(Value(a), Register(b), Register(c))
-  }
+case object Gtir {
+  def fromInts(a: Int, b: Int, c: Int) = Gtir(Value(a), Register(b), Register(c))
+}
 
-  case class Gtri(a: Register, b: Value, c: Register) extends Opcode {
-    override def run(state: DeviceState): DeviceState = {
-      if (state.read(a) > b) {
-        state.write(c, Value(1))
-      } else {
-        state.write(c, Value(0))
-      }
+case class Gtri(a: Register, b: Value, c: Register) extends Opcode {
+  override def run(state: DeviceState): DeviceState = {
+    if (state.read(a) > b) {
+      state.write(c, Value(1))
+    } else {
+      state.write(c, Value(0))
     }
   }
+}
 
-  case object Gtri {
-    def fromInts(a: Int, b: Int, c: Int) = Gtri(Register(a), Value(b), Register(c))
-  }
+case object Gtri {
+  def fromInts(a: Int, b: Int, c: Int) = Gtri(Register(a), Value(b), Register(c))
+}
 
-  case class Gtrr(a: Register, b: Register, c: Register) extends Opcode {
-    override def run(state: DeviceState): DeviceState = {
-      if (state.read(a) > state.read(b)) {
-        state.write(c, Value(1))
-      } else {
-        state.write(c, Value(0))
-      }
+case class Gtrr(a: Register, b: Register, c: Register) extends Opcode {
+  override def run(state: DeviceState): DeviceState = {
+    if (state.read(a) > state.read(b)) {
+      state.write(c, Value(1))
+    } else {
+      state.write(c, Value(0))
     }
   }
+}
 
-  case object Gtrr {
-    def fromInts(a: Int, b: Int, c: Int) = Gtrr(Register(a), Register(b), Register(c))
-  }
+case object Gtrr {
+  def fromInts(a: Int, b: Int, c: Int) = Gtrr(Register(a), Register(b), Register(c))
+}
 
-  case class Eqir(a: Value, b: Register, c: Register) extends Opcode {
-    override def run(state: DeviceState): DeviceState = {
-      if (a == state.read(b)) {
-        state.write(c, Value(1))
-      } else {
-        state.write(c, Value(0))
-      }
+case class Eqir(a: Value, b: Register, c: Register) extends Opcode {
+  override def run(state: DeviceState): DeviceState = {
+    if (a == state.read(b)) {
+      state.write(c, Value(1))
+    } else {
+      state.write(c, Value(0))
     }
   }
+}
 
-  case object Eqir {
-    def fromInts(a: Int, b: Int, c: Int) = Eqir(Value(a), Register(b), Register(c))
-  }
+case object Eqir {
+  def fromInts(a: Int, b: Int, c: Int) = Eqir(Value(a), Register(b), Register(c))
+}
 
-  case class Eqri(a: Register, b: Value, c: Register) extends Opcode {
-    override def run(state: DeviceState): DeviceState = {
-      if (state.read(a) == b) {
-        state.write(c, Value(1))
-      } else {
-        state.write(c, Value(0))
-      }
+case class Eqri(a: Register, b: Value, c: Register) extends Opcode {
+  override def run(state: DeviceState): DeviceState = {
+    if (state.read(a) == b) {
+      state.write(c, Value(1))
+    } else {
+      state.write(c, Value(0))
     }
   }
+}
 
-  case object Eqri {
-    def fromInts(a: Int, b: Int, c: Int) = Eqri(Register(a), Value(b), Register(c))
-  }
+case object Eqri {
+  def fromInts(a: Int, b: Int, c: Int) = Eqri(Register(a), Value(b), Register(c))
+}
 
-  case class Eqrr(a: Register, b: Register, c: Register) extends Opcode {
-    override def run(state: DeviceState): DeviceState = {
-      if (state.read(a) == state.read(b)) {
-        state.write(c, Value(1))
-      } else {
-        state.write(c, Value(0))
-      }
+case class Eqrr(a: Register, b: Register, c: Register) extends Opcode {
+  override def run(state: DeviceState): DeviceState = {
+    if (state.read(a) == state.read(b)) {
+      state.write(c, Value(1))
+    } else {
+      state.write(c, Value(0))
     }
   }
+}
 
-  case object Eqrr {
-    def fromInts(a: Int, b: Int, c: Int) = Eqrr(Register(a), Register(b), Register(c))
-  }
-
+case object Eqrr {
+  def fromInts(a: Int, b: Int, c: Int) = Eqrr(Register(a), Register(b), Register(c))
 }
