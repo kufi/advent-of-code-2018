@@ -18,9 +18,8 @@ class Day22 extends Challenge[Int, Int] {
         case (state :: tail, visited) if visited.get(state.key).exists(_ <= state.time) || !state.validTool(erosionLevel(state.position) % 3) =>
           (tail, visited)
         case (state :: tail, visited) =>
-          val adjacent = state.adjacent()
-          val nonToolChanges = adjacent.map(p => State(p, state.tool, state.time + 1))
-          val toolChanges = state.tool.others.map(t => State(state.position, t, state.time + 7))
+          val nonToolChanges = state.adjacent().map(State(_, state.tool, state.time + 1))
+          val toolChanges = state.tool.others.map(State(state.position, _, state.time + 7))
           ((tail ++ nonToolChanges ++ toolChanges).sortBy(_.time), visited + (state.key -> state.time))
       }
       .find(s => s._1.head.position == (targetX, targetY) && s._1.head.tool == Torch)
