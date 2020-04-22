@@ -26,7 +26,8 @@ object Main {
     19 -> (() => new Day19()),
     20 -> (() => new Day20()),
     21 -> (() => new Day21()),
-    22 -> (() => new Day22())
+    22 -> (() => new Day22()),
+    23 -> (() => new Day23())
   )
 
   def main(args: Array[String]): Unit = {
