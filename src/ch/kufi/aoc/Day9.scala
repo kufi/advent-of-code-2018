@@ -1,7 +1,5 @@
 package ch.kufi.aoc
 
-import java.util
-
 class Day9 extends Challenge[Long, Long] {
   val inputRegex = """([0-9]+) players; last marble is worth ([0-9]+) points""".r
 
